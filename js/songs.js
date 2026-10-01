@@ -1,0 +1,128 @@
+/* SingItOut — song templates (all melodies are public-domain / traditional) */
+window.SIO = window.SIO || {};
+(function(){
+const NOTE_PC = {C:0,D:2,E:4,F:5,G:7,A:9,B:11};
+function noteToMidi(n){
+  const m = /^([A-G])([#b]?)(-?\d)$/.exec(n);
+  if(!m) throw new Error('bad note '+n);
+  let pc = NOTE_PC[m[1]] + (m[2]==='#'?1:m[2]==='b'?-1:0);
+  return 12*(parseInt(m[3])+1)+pc;
+}
+function parse(str){
+  return str.trim().split(/\s+/).filter(t=>t && t!=='|').map(tok=>{
+    const [n,d] = tok.split('/');
+    const dur = d===undefined ? 1 : parseFloat(d);
+    return n==='R' ? {rest:true,dur} : {midi:noteToMidi(n),dur};
+  });
+}
+// key: tonic pitch class (C=0). style = accompaniment style
+const S = [
+ {id:'bday', cat:'Party', title:'Happy Birthday', composer:'Hill Sisters (trad.)', emoji:'🎂', bpm:100, bpb:3, pickup:1, key:0, mode:'maj', style:'waltz', fx:'confetti',
+  notes:'G4/0.75 G4/0.25 A4 G4 C5 B4/2 G4/0.75 G4/0.25 A4 G4 D5 C5/2 G4/0.75 G4/0.25 G5 E5 C5 B4 A4/2 F5/0.75 F5/0.25 E5 C5 D5 C5/3'},
+ {id:'elise', cat:'Classical', title:'Für Elise', composer:'Beethoven', emoji:'🎹', bpm:160, bpb:3, pickup:2, key:9, mode:'min', style:'arp', fx:'kaleido',
+  notes:'E5 D#5 E5 D#5 E5 B4 D5 C5 A4/2 R C4 E4 A4 B4/2 R E4 G#4 B4 C5/2 R E4 E5 D#5 E5 D#5 E5 B4 D5 C5 A4/2 R C4 E4 A4 B4/2 R E4 C5 B4 A4/4'},
+ {id:'tell', cat:'Classical', title:'William Tell Overture', composer:'Rossini', emoji:'🐎', bpm:118, bpb:2, pickup:0, key:0, mode:'maj', style:'gallop', fx:'warp',
+  notes:'G4/0.25 G4/0.25 G4/0.5 G4/0.25 G4/0.25 G4/0.5 G4/0.25 G4/0.25 C5/0.5 D5/0.5 E5/0.5 G4/0.25 G4/0.25 G4/0.5 G4/0.25 G4/0.25 C5/0.5 E5/0.25 E5/0.25 D5/0.5 B4/0.5 G4/0.5 G4/0.25 G4/0.25 G4/0.5 G4/0.25 G4/0.25 G4/0.5 G4/0.25 G4/0.25 C5/0.5 D5/0.5 E5/0.5 C5/0.25 E5/0.25 G5/1 F5/0.25 E5/0.25 D5/0.5 C5/1'},
+ {id:'twinkle', cat:'Kids', title:'Twinkle Twinkle Little Star', composer:'Traditional', emoji:'⭐', bpm:108, bpb:4, pickup:0, key:0, mode:'maj', style:'pad', fx:'warp',
+  notes:'C4 C4 G4 G4 A4 A4 G4/2 F4 F4 E4 E4 D4 D4 C4/2 G4 G4 F4 F4 E4 E4 D4/2 G4 G4 F4 F4 E4 E4 D4/2 C4 C4 G4 G4 A4 A4 G4/2 F4 F4 E4 E4 D4 D4 C4/2'},
+ {id:'ode', cat:'Classical', title:'Ode to Joy', composer:'Beethoven', emoji:'🎻', bpm:120, bpb:4, pickup:0, key:0, mode:'maj', style:'march', fx:'fireworks',
+  notes:'E4 E4 F4 G4 G4 F4 E4 D4 C4 C4 D4 E4 E4/1.5 D4/0.5 D4/2 E4 E4 F4 G4 G4 F4 E4 D4 C4 C4 D4 E4 D4/1.5 C4/0.5 C4/2 D4 D4 E4 C4 D4 E4/0.5 F4/0.5 E4 C4 D4 E4/0.5 F4/0.5 E4 D4 C4 D4 G3/2 E4 E4 F4 G4 G4 F4 E4 D4 C4 C4 D4 E4 D4/1.5 C4/0.5 C4/2'},
+ {id:'jingle', cat:'Holiday', title:'Jingle Bells', composer:'J. Pierpont', emoji:'🔔', bpm:150, bpb:4, pickup:0, key:0, mode:'maj', style:'oompah', fx:'snow',
+  notes:'E4 E4 E4/2 E4 E4 E4/2 E4 G4 C4/1.5 D4/0.5 E4/4 F4 F4 F4/1.5 F4/0.5 F4 E4 E4 E4/0.5 E4/0.5 E4 D4 D4 E4 D4/2 G4/2 E4 E4 E4/2 E4 E4 E4/2 E4 G4 C4/1.5 D4/0.5 E4/4 F4 F4 F4 F4 F4 E4 E4 E4/0.5 E4/0.5 G4 G4 F4 D4 C4/4'},
+ {id:'row', cat:'Kids', title:'Row, Row, Row Your Boat', composer:'Traditional', emoji:'🚣', bpm:100, bpb:3, pickup:0, key:0, mode:'maj', style:'waltz', fx:'underwater',
+  notes:'C4/1.5 C4/1.5 C4 D4/0.5 E4/1.5 E4 D4/0.5 E4 F4/0.5 G4/3 C5/0.5 C5/0.5 C5/0.5 G4/0.5 G4/0.5 G4/0.5 E4/0.5 E4/0.5 E4/0.5 C4/0.5 C4/0.5 C4/0.5 G4 F4/0.5 E4 D4/0.5 C4/3'},
+ {id:'macdonald', cat:'Kids', title:'Old MacDonald', composer:'Traditional', emoji:'🐄', bpm:130, bpb:4, pickup:0, key:7, mode:'maj', style:'oompah', fx:'emoji',
+  notes:'G4 G4 G4 D4 E4 E4 D4/2 B4 B4 A4 A4 G4/3 D4 G4 G4 G4 D4 E4 E4 D4/2 B4 B4 A4 A4 G4/4'},
+ {id:'yankee', cat:'Folk', title:'Yankee Doodle', composer:'Traditional', emoji:'🪶', bpm:120, bpb:4, pickup:0, key:0, mode:'maj', style:'march', fx:'fireworks',
+  notes:'C4/0.5 C4/0.5 D4/0.5 E4/0.5 C4/0.5 E4/0.5 D4/0.5 G3/0.5 C4/0.5 C4/0.5 D4/0.5 E4/0.5 C4 B3 C4/0.5 C4/0.5 D4/0.5 E4/0.5 F4/0.5 E4/0.5 D4/0.5 C4/0.5 B3/0.5 G3/0.5 A3/0.5 B3/0.5 C4 C4'},
+ {id:'saints', cat:'Folk', title:'When the Saints Go Marching In', composer:'Traditional', emoji:'🎺', bpm:150, bpb:4, pickup:0, key:0, mode:'maj', style:'ragtime', fx:'disco',
+  notes:'C4 E4 F4 G4/4 C4 E4 F4 G4/4 C4 E4 F4 G4/2 E4/2 C4/2 E4/2 D4/4 E4 E4 D4 C4/3 C4 E4/2 G4/2 G4 F4/3 E4 F4 G4/2 E4/2 C4/2 D4/2 C4/4'},
+ {id:'lullaby', cat:'Classical', title:"Brahms' Lullaby", composer:'Brahms', emoji:'🌙', bpm:84, bpb:3, pickup:1, key:0, mode:'maj', style:'pad', fx:'lava',
+  notes:'E4/0.5 E4/0.5 G4/2 E4/0.5 E4/0.5 G4/2 E4/0.5 G4/0.5 C5 B4/1.5 A4/0.5 A4 G4 D4/0.5 E4/0.5 F4 D4 D4/0.5 E4/0.5 F4/2 D4/0.5 F4/0.5 B4/0.5 A4/0.5 G4 B4 C5/2'},
+ {id:'frere', cat:'Kids', title:'Frère Jacques', composer:'Traditional', emoji:'🔔', bpm:110, bpb:4, pickup:0, key:0, mode:'maj', style:'pad', fx:'haunted',
+  notes:'C4 D4 E4 C4 C4 D4 E4 C4 E4 F4 G4/2 E4 F4 G4/2 G4/0.5 A4/0.5 G4/0.5 F4/0.5 E4 C4 G4/0.5 A4/0.5 G4/0.5 F4/0.5 E4 C4 C4 G3 C4/2 C4 G3 C4/2'},
+ {id:'susanna', cat:'Folk', title:'Oh! Susanna', composer:'Stephen Foster', emoji:'🪕', bpm:130, bpb:4, pickup:0, key:0, mode:'maj', style:'oompah', fx:'emoji',
+  notes:'C4/0.5 D4/0.5 E4 G4 G4/1.5 A4/0.5 G4 E4 C4/1.5 D4/0.5 E4 E4 D4 C4 D4/3 C4/0.5 D4/0.5 E4 G4 G4/1.5 A4/0.5 G4 E4 C4/1.5 D4/0.5 E4 E4 D4 D4 C4/4'},
+ {id:'mountainking', cat:'Classical', title:'In the Hall of the Mountain King', composer:'Grieg', emoji:'👹', bpm:110, bpb:4, pickup:0, key:9, mode:'min', style:'march', fx:'haunted', accel:true,
+  notes:'A3/0.5 B3/0.5 C4/0.5 D4/0.5 E4/0.5 C4/0.5 E4 D#4/0.5 B3/0.5 D#4 D4/0.5 A#3/0.5 D4 A3/0.5 B3/0.5 C4/0.5 D4/0.5 E4/0.5 C4/0.5 E4/0.5 A4/0.5 G4/0.5 E4/0.5 C4/0.5 E4/0.5 G4/2'},
+ {id:'cancan', cat:'Classical', title:'Can-Can (Galop Infernal)', composer:'Offenbach', emoji:'💃', bpm:150, bpb:2, pickup:0, key:0, mode:'maj', style:'gallop', fx:'disco',
+  notes:'C4 D4/0.5 F4/0.5 E4/0.5 D4/0.5 G4 G4 G4/0.5 A4/0.5 E4/0.5 F4/0.5 D4 D4 D4/0.5 F4/0.5 E4/0.5 D4/0.5 C4/0.5 C5/0.5 B4/0.5 A4/0.5 G4/0.5 F4/0.5 E4/0.5 D4/0.5 C4/2'},
+ {id:'fifth', cat:'Classical', title:'Symphony No. 5', composer:'Beethoven', emoji:'⚡', bpm:108, bpb:2, pickup:0, key:0, mode:'min', style:'drama', fx:'storm',
+  notes:'R/0.5 G4/0.5 G4/0.5 G4/0.5 D#4/2 R/0.5 F4/0.5 F4/0.5 F4/0.5 D4/2 R/0.5 G4/0.5 G4/0.5 G4/0.5 D#4/0.5 G#4/0.5 G#4/0.5 G#4/0.5 G4/0.5 D#5/0.5 D#5/0.5 D#5/0.5 C5/2'},
+ {id:'eine', cat:'Classical', title:'Eine kleine Nachtmusik', composer:'Mozart', emoji:'🕯️', bpm:126, bpb:4, pickup:0, key:7, mode:'maj', style:'arp', fx:'kaleido',
+  notes:'G4 R/0.5 D4/0.5 G4 R/0.5 D4/0.5 G4/0.5 D4/0.5 G4/0.5 B4/0.5 D5/2 C5 R/0.5 A4/0.5 C5 R/0.5 A4/0.5 C5/0.5 A4/0.5 F#4/0.5 A4/0.5 D4/2'},
+ {id:'weasel', cat:'Kids', title:'Pop Goes the Weasel', composer:'Traditional', emoji:'🐿️', bpm:120, bpb:3, pickup:0, key:5, mode:'maj', style:'waltz', fx:'emoji',
+  notes:'C4 F4/0.5 F4 G4/0.5 G4 A4/0.5 C5/0.5 A4/0.5 F4/0.5 C4 F4/0.5 F4 G4/0.5 A4/1.5 F4 C4/0.5 C4 F4/0.5 F4 G4/0.5 G4 A4/0.5 C5/0.5 A4/0.5 F4/0.5 D5/1.5 G4 A#4/0.5 A4/1.5 F4/1.5'},
+ {id:'swan', cat:'Classical', title:'Swan Lake', composer:'Tchaikovsky', emoji:'🦢', bpm:90, bpb:4, pickup:0, key:9, mode:'min', style:'drama', fx:'underwater',
+  notes:'E5/4 A4/0.5 B4/0.5 C5/0.5 D5/0.5 E5/2 C5 E5/2 C5 E5/2 A4 C5 A4 F4 C5 A4/4'},
+ {id:'greensleeves', cat:'Folk', title:'Greensleeves', composer:'Traditional', emoji:'🍃', bpm:120, bpb:3, pickup:1, key:9, mode:'min', style:'waltz', fx:'lava',
+  notes:'A4 C5/2 D5 E5/1.5 F5/0.5 E5 D5/2 B4 G4/1.5 A4/0.5 B4 C5/2 A4 A4/1.5 G#4/0.5 A4 B4/2 G#4 E4/2 A4 C5/2 D5 E5/1.5 F5/0.5 E5 D5/2 B4 G4/1.5 A4/0.5 B4 C5/1.5 B4/0.5 A4 G#4/1.5 F#4/0.5 G#4 A4/3'},
+ {id:'grace', cat:'Folk', title:'Amazing Grace', composer:'Traditional', emoji:'🕊️', bpm:96, bpb:3, pickup:1, key:7, mode:'maj', style:'pad', fx:'storm',
+  notes:'D4 G4/2 B4/0.5 G4/0.5 B4/2 A4 G4/2 E4 D4/2 D4 G4/2 B4/0.5 G4/0.5 B4/2 A4 D5/5 B4 D5/1.5 B4/0.5 D5/0.5 B4/0.5 G4/2 D4 E4/1.5 G4/0.5 G4/0.5 E4/0.5 D4/2 D4 G4/2 B4/0.5 G4/0.5 B4/2 A4 G4/5'},
+ {id:'auld', cat:'Holiday', title:'Auld Lang Syne', composer:'Traditional', emoji:'🥂', bpm:100, bpb:4, pickup:1, key:5, mode:'maj', style:'pad', fx:'fireworks',
+  notes:'C4 F4/1.5 F4/0.5 F4 A4 G4/1.5 F4/0.5 G4 A4/0.5 G4/0.5 F4/1.5 F4/0.5 A4 C5 D5/3 D5 C5/1.5 A4/0.5 A4 F4 G4/1.5 F4/0.5 G4 A4/0.5 G4/0.5 F4/1.5 D4/0.5 D4 C4 F4/3'},
+ {id:'wedding', cat:'Party', title:'Bridal Chorus (Here Comes the Bride)', composer:'Wagner', emoji:'💍', bpm:76, bpb:4, pickup:1, key:5, mode:'maj', style:'pad', fx:'confetti',
+  notes:'C4 F4/0.75 F4/0.25 F4/2 C4 G4/0.75 E4/0.25 F4/2 C4 F4/0.75 A#4/0.25 A#4 A4/0.75 G4/0.25 F4/0.75 E4/0.25 F4/0.75 G4/0.25 F4/3'},
+ {id:'funeral', cat:'Classical', title:'Funeral March', composer:'Chopin', emoji:'⚰️', bpm:56, bpb:4, pickup:0, key:0, mode:'min', style:'drama', fx:'haunted',
+  notes:'C4 C4/0.75 C4/0.25 C4 D#4/0.75 D4/0.25 D4/0.75 C4/0.25 C4/0.75 B3/0.25 C4/2 R/2'},
+ {id:'turca', cat:'Classical', title:'Rondo alla Turca', composer:'Mozart', emoji:'🐫', bpm:120, bpb:2, pickup:0, key:9, mode:'min', style:'arp', fx:'glitch',
+  notes:'B3/0.25 A3/0.25 G#3/0.25 A3/0.25 C4 D4/0.25 C4/0.25 B3/0.25 C4/0.25 E4 F4/0.25 E4/0.25 D#4/0.25 E4/0.25 B4/0.25 A4/0.25 G#4/0.25 A4/0.25 B4/0.25 A4/0.25 G#4/0.25 A4/0.25 C5 A4/0.5 C5/0.5 B4/0.5 A4/0.5 G4/0.5 A4/0.5 B4/0.5 A4/0.5 G4/0.5 A4/0.5 B4/0.5 A4/0.5 G4/0.5 F#4/0.5 E4'},
+ {id:'morning', cat:'Classical', title:'Morning Mood', composer:'Grieg', emoji:'🌅', bpm:100, bpb:3, pickup:0, key:0, mode:'maj', style:'pad', fx:'synthwave',
+  notes:'G4 E4/0.5 D4/0.5 C4/0.5 D4/0.5 E4/0.5 G4/0.5 E4/0.5 D4/0.5 C4/0.5 D4/0.5 E4/0.5 D4/0.5 E4/0.5 G4/0.5 E4/0.5 G4/0.5 A4/0.5 E4/0.5 A4/0.5 G4/0.5 E4/0.5 D4/0.5 C4/3'},
+ {id:'cucaracha', cat:'Party', title:'La Cucaracha', composer:'Traditional', emoji:'🪳', bpm:150, bpb:3, pickup:0, key:5, mode:'maj', style:'oompah', fx:'disco',
+  notes:'C4/0.5 C4/0.5 C4/0.5 F4/1.5 A4 C4/0.5 C4/0.5 C4/0.5 F4/1.5 A4/2 F4/0.5 F4/0.5 E4/0.5 E4/0.5 D4/0.5 D4/0.5 C4/3 C4/0.5 C4/0.5 C4/0.5 E4/1.5 G4 C4/0.5 C4/0.5 C4/0.5 E4/1.5 G4/2 C5/0.5 D5/0.5 C5/0.5 A#4/0.5 A4/0.5 G4/0.5 F4/3'},
+ {id:'entertainer', cat:'Classical', title:'The Entertainer', composer:'Scott Joplin', emoji:'🎩', bpm:100, bpb:4, pickup:1, key:0, mode:'maj', style:'ragtime', fx:'synthwave',
+  notes:'D4/0.25 D#4/0.25 E4/0.5 C5 E4/0.5 C5 E4/0.5 C5/3 C5/0.5 D5/0.5 D#5/0.5 E5/0.5 C5/0.5 D5/0.5 E5 B4/0.5 D5 C5/3'},
+ {id:'bumblebee', cat:'Classical', title:'Flight of the Bumblebee', composer:'Rimsky-Korsakov', emoji:'🐝', bpm:96, bpb:2, pickup:0, key:9, mode:'min', style:'arp', fx:'glitch',
+  notes:'E5/0.25 D#5/0.25 D5/0.25 C#5/0.25 C5/0.25 F5/0.25 E5/0.25 D#5/0.25 E5/0.25 D#5/0.25 D5/0.25 C#5/0.25 C5/0.25 C#5/0.25 D5/0.25 D#5/0.25 E5/0.25 D#5/0.25 D5/0.25 C#5/0.25 C5/0.25 F5/0.25 E5/0.25 D#5/0.25 E5/0.25 D#5/0.25 D5/0.25 C#5/0.25 C5/0.25 C#5/0.25 D5/0.25 D#5/0.25 E5/0.25 D#5/0.25 D5/0.25 C#5/0.25 C5/0.25 B4/0.25 A#4/0.25 A4/0.25 G#4/0.25 A4/0.25 A#4/0.25 B4/0.25 C5/0.25 B4/0.25 A#4/0.25 A4/0.25 E4/2'},
+ {id:'canon', cat:'Classical', title:'Canon in D', composer:'Pachelbel', emoji:'🌸', bpm:72, bpb:4, pickup:0, key:0, mode:'maj', style:'pad', fx:'lava',
+  notes:'E5/2 D5/2 C5/2 B4/2 A4/2 G4/2 A4/2 B4/2 C5 B4 A4 G4 F4 E4 F4 D4 C4/0.5 E4/0.5 G4/0.5 F4/0.5 E4/0.5 C4/0.5 E4/0.5 D4/0.5 C4/0.5 A3/0.5 C4/0.5 G4/0.5 F4/0.5 A4/0.5 G4/0.5 F4/0.5 E4/4'},
+ {id:'taps', cat:'Folk', title:'Taps', composer:'Daniel Butterfield', emoji:'🎖️', bpm:66, bpb:4, pickup:0, key:0, mode:'maj', style:'drama', fx:'storm',
+  notes:'G3/0.75 G3/0.25 C4/3 G3/0.75 C4/0.25 E4/3 G3/0.5 C4/0.5 E4/2 G3/0.5 C4/0.5 E4/2 G3/0.5 C4/0.5 E4/3 C4/0.75 E4/0.25 G4/3 E4 C4 G3/3 G3/0.75 G3/0.25 C4/4'},
+ {id:'valkyries', cat:'Classical', title:'Ride of the Valkyries', composer:'Wagner', emoji:'🛡️', bpm:100, bpb:3, pickup:0, key:11, mode:'min', style:'drama', fx:'storm',
+  notes:'F#3/0.25 B3/0.75 F#3/0.25 B3/0.5 D4/1.5 B3/1.5 D4/0.75 B3/0.25 D4/0.5 F#4/1.5 D4/1.5 F#4/0.75 D4/0.25 F#4/0.5 A4/1.5 A3/1.5 D4/0.75 A3/0.25 D4/0.5 F#4/3'},,
+ {id:'mary', cat:'Kids', title:'Mary Had a Little Lamb', composer:'Traditional', emoji:'🐑', bpm:120, bpb:4, pickup:0, key:0, mode:'maj', style:'oompah', fx:'food',
+  notes:'E4 D4 C4 D4 E4 E4 E4/2 D4 D4 D4/2 E4 G4 G4/2 E4 D4 C4 D4 E4 E4 E4 E4 D4 D4 E4 D4 C4/4'},
+ {id:'london', cat:'Kids', title:'London Bridge', composer:'Traditional', emoji:'🌉', bpm:120, bpb:4, pickup:0, key:0, mode:'maj', style:'march', fx:'confetti',
+  notes:'G4/1.5 A4/0.5 G4 F4 E4 F4 G4/2 D4 E4 F4/2 E4 F4 G4/2 G4/1.5 A4/0.5 G4 F4 E4 F4 G4/2 D4/2 G4/2 E4 C4/3'},
+ {id:'spider', cat:'Kids', title:'Itsy Bitsy Spider', composer:'Traditional', emoji:'🕷️', bpm:110, bpb:3, pickup:0.5, key:0, mode:'maj', style:'waltz', fx:'eyeballs',
+  notes:'G3/0.5 C4 C4/0.5 C4 D4/0.5 E4/1.5 E4 E4/0.5 D4 C4/0.5 D4 E4/0.5 C4/2.5 E4/1.5 E4 F4/0.5 G4/1.5 G4/1.5 F4 E4/0.5 F4 G4/0.5 E4/3 C4/1.5 C4 D4/0.5 E4/1.5 E4/1.5 D4 C4/0.5 D4 E4/0.5 C4/2.5 G3/0.5 G3 G3/0.5 C4 C4/0.5 C4 D4/0.5 E4/1.5 E4 E4/0.5 D4 C4/0.5 D4 E4/0.5 C4/3'},
+ {id:'camptown', cat:'Folk', title:'Camptown Races', composer:'Stephen Foster', emoji:'🏇', bpm:140, bpb:4, pickup:0, key:0, mode:'maj', style:'oompah', fx:'emoji',
+  notes:'G4/0.5 G4/0.5 E4/0.5 G4/0.5 A4/0.5 G4/0.5 E4 E4/0.5 D4/1.5 E4/0.5 D4/1.5 G4/0.5 G4/0.5 E4/0.5 G4/0.5 A4/0.5 G4/0.5 E4 D4/0.5 E4/0.5 D4/0.5 C4/2.5'},
+ {id:'clementine', cat:'Folk', title:'Oh My Darling, Clementine', composer:'Traditional', emoji:'⛏️', bpm:120, bpb:3, pickup:1, key:5, mode:'maj', style:'waltz', fx:'underwater',
+  notes:'C4/0.75 C4/0.25 C4 G3 E4/0.75 E4/0.25 E4 C4 C4/0.75 E4/0.25 G4/1.5 G4/0.5 F4/0.5 E4/0.5 D4/2 D4/0.75 E4/0.25 F4 F4 E4/0.75 D4/0.25 E4 C4 C4/0.75 E4/0.25 D4/1.5 G3/0.5 B3/0.5 D4/0.5 C4/2'},
+ {id:'mountain', cat:'Folk', title:"She'll Be Coming Round the Mountain", composer:'Traditional', emoji:'⛰️', bpm:140, bpb:4, pickup:1, key:0, mode:'maj', style:'ragtime', fx:'synthwave',
+  notes:'G4/0.5 A4/0.5 C5 C5 C5 A4/0.5 G4/0.5 E4/0.5 G4/0.5 C5/3 C5/0.5 D5/0.5 E5 E5 E5 G5/0.5 E5/0.5 D5/0.5 C5/0.5 D5/3 E5/0.5 F5/0.5 G5 G5 G5 E5/0.5 C5/0.5 F5 F5 F5 D5/0.5 B4/0.5 C5 C5/0.5 C5/0.5 B4/0.5 A4/0.5 G4 D5/0.5 C5/0.5 C5/3'},
+ {id:'deck', cat:'Holiday', title:'Deck the Halls', composer:'Traditional', emoji:'🎄', bpm:130, bpb:4, pickup:0, key:5, mode:'maj', style:'march', fx:'snow',
+  notes:'G4/1.5 F4/0.5 E4 D4 C4 D4 E4 C4 D4/0.5 E4/0.5 F4/0.5 D4/0.5 E4/1.5 D4/0.5 C4 B3 C4/4 G4/1.5 F4/0.5 E4 D4 C4 D4 E4 C4 D4/0.5 E4/0.5 F4/0.5 D4/0.5 E4/1.5 D4/0.5 C4 B3 C4/4'},
+ {id:'wewish', cat:'Holiday', title:'We Wish You a Merry Christmas', composer:'Traditional', emoji:'🎅', bpm:150, bpb:3, pickup:1, key:7, mode:'maj', style:'waltz', fx:'snow',
+  notes:'D4 G4 G4/0.5 A4/0.5 G4/0.5 F#4/0.5 E4 E4 E4 A4 A4/0.5 B4/0.5 A4/0.5 G4/0.5 F#4 D4 D4 B4 B4/0.5 C5/0.5 B4/0.5 A4/0.5 G4 E4 D4/0.5 D4/0.5 E4 A4 F#4 G4/2'},
+ {id:'silent', cat:'Holiday', title:'Silent Night', composer:'Franz Gruber', emoji:'🕯️', bpm:96, bpb:3, pickup:0, key:0, mode:'maj', style:'pad', fx:'snow',
+  notes:'G4/1.5 A4/0.5 G4 E4/3 G4/1.5 A4/0.5 G4 E4/3 D5/2 D5 B4/3 C5/2 C5 G4/3 A4/2 A4 C5/1.5 B4/0.5 A4 G4/1.5 A4/0.5 G4 E4/3 A4/2 A4 C5/1.5 B4/0.5 A4 G4/1.5 A4/0.5 G4 E4/3 D5/2 D5 F5/1.5 D5/0.5 B4 C5/3 E5/3 C5 G4 E4 G4/1.5 F4/0.5 D4 C4/3'},
+ {id:'minuet', cat:'Classical', title:'Minuet in G', composer:'Petzold (attr. Bach)', emoji:'👑', bpm:130, bpb:3, pickup:0, key:7, mode:'maj', style:'arp', fx:'kaleido',
+  notes:'D5 G4/0.5 A4/0.5 B4/0.5 C5/0.5 D5 G4 G4 E5 C5/0.5 D5/0.5 E5/0.5 F#5/0.5 G5 G4 G4 C5 D5/0.5 C5/0.5 B4/0.5 A4/0.5 B4 C5/0.5 B4/0.5 A4/0.5 G4/0.5 F#4 G4/0.5 A4/0.5 B4/0.5 G4/0.5 A4/3'},
+ {id:'toreador', cat:'Classical', title:'Toreador Song', composer:'Bizet', emoji:'🐂', bpm:110, bpb:4, pickup:0, key:5, mode:'maj', style:'march', fx:'fireworks',
+  notes:'C5 D5/0.75 C5/0.25 A4 A4 A4/0.75 G4/0.25 A4/0.75 A#4/0.25 A4/2 A#4/0.75 G4/0.25 C5/1.5 A4/0.5 F4/0.75 D4/0.25 G4/0.75 C4/0.25 F4/3 R'},
+ {id:'habanera', cat:'Classical', title:'Habanera', composer:'Bizet', emoji:'🌹', bpm:96, bpb:2, pickup:0, key:2, mode:'min', style:'drama', fx:'lava',
+  notes:'D5/0.75 C#5/0.25 C5/0.5 C5/0.5 B4/0.5 A#4/0.25 A#4/0.25 A4/0.75 A4/0.25 G#4/0.5 G4/0.5 F4/0.25 E4/0.25 F4/0.5 R/0.5 G4/0.25 F4/0.25 E4/2'},
+ {id:'danube', cat:'Classical', title:'The Blue Danube', composer:'J. Strauss II', emoji:'🌊', bpm:150, bpb:3, pickup:0, key:2, mode:'maj', style:'waltz', fx:'underwater',
+  notes:'D4 D4 F#4 A4 A4/2 A5 A5/2 F#5 F#5/2 D4 D4 F#4 A4 A4/2 A5 A5/2 G5 G5/2 C#4 C#4 E4 B4 B4/2 B5 B5/2 G5 G5/2 C#4 C#4 E4 B4 B4/2 B5 B5/2 F#5 F#5/2 D4 D4 F#4 A4 D5/2 D6/3 A5/3'},
+ {id:'spring', cat:'Classical', title:'Spring (Four Seasons)', composer:'Vivaldi', emoji:'🌷', bpm:110, bpb:4, pickup:0, key:4, mode:'maj', style:'arp', fx:'confetti',
+  notes:'E4 G#4 G#4 G#4 F#4/0.5 E4/0.5 B4/3 B4/0.5 A4/0.5 G#4 G#4 G#4 F#4/0.5 E4/0.5 B4/3 B4/0.5 A4/0.5 G#4 A4/0.5 B4/0.5 A4 G#4 F#4/4'},
+ {id:'pomp', cat:'Party', title:'Pomp and Circumstance', composer:'Elgar', emoji:'🎓', bpm:84, bpb:4, pickup:0, key:7, mode:'maj', style:'drama', fx:'fireworks',
+  notes:'B4/1.5 A4/0.5 G4 A4 B4/2 E4/2 C5/1.5 B4/0.5 A4 B4 G4/4 B4/1.5 A4/0.5 G4 A4 B4/2 E5/2 D5/1.5 C5/0.5 B4 C5 D5/4'},
+ {id:'tetris', cat:'Party', title:'Korobeiniki (Tetris Theme)', composer:'Russian Folk', emoji:'🧱', bpm:144, bpb:4, pickup:0, key:9, mode:'min', style:'arp', fx:'glitch',
+  notes:'E5 B4/0.5 C5/0.5 D5 C5/0.5 B4/0.5 A4 A4/0.5 C5/0.5 E5 D5/0.5 C5/0.5 B4/1.5 C5/0.5 D5 E5 C5 A4 A4/2 R/0.5 D5 F5/0.5 A5 G5/0.5 F5/0.5 E5/1.5 C5/0.5 E5 D5/0.5 C5/0.5 B4 B4/0.5 C5/0.5 D5 E5 C5 A4 A4/2'},
+ {id:'sailor', cat:'Folk', title:'Drunken Sailor', composer:'Sea Shanty', emoji:'🏴‍☠️', bpm:130, bpb:4, pickup:0, key:2, mode:'min', style:'oompah', fx:'storm',
+  notes:'A4/0.5 A4/0.25 A4/0.25 A4/0.5 A4/0.25 A4/0.25 A4/0.5 D4/0.5 F4/0.5 A4/0.5 G4/0.5 G4/0.25 G4/0.25 G4/0.5 G4/0.25 G4/0.25 G4/0.5 C4/0.5 E4/0.5 G4/0.5 A4/0.5 A4/0.25 A4/0.25 A4/0.5 A4/0.25 A4/0.25 A4/0.5 B4/0.5 C5/0.5 D5/0.5 C5/0.5 A4/0.5 G4/0.5 E4/0.5 D4 D4'},
+ {id:'hava', cat:'Party', title:'Hava Nagila', composer:'Traditional', emoji:'🕺', bpm:130, bpb:4, pickup:0, key:9, mode:'min', style:'oompah', fx:'disco', accel:true,
+  notes:'E4/1.5 E4/0.5 G#4 F4 E4/2 G#4/1.5 G#4/0.5 B4 A4 G#4/2 B4/1.5 B4/0.5 D5 C5 B4/2 B4 A4 F4 E4/2'},
+ {id:'danny', cat:'Folk', title:'Danny Boy (Londonderry Air)', composer:'Traditional', emoji:'☘️', bpm:76, bpb:4, pickup:1.5, key:0, mode:'maj', style:'pad', fx:'lava',
+  notes:'C4/0.5 D4/0.5 E4/0.5 D4/1.5 G4 A4 G4/1.5 E4/0.5 C4/0.5 A3/0.5 C4/1.5 F4/0.5 A4 B4 C5/1.5 B4/0.5 A4/0.5 G4/0.5 A4/0.5 G4/3'},
+ {id:'scarborough', cat:'Folk', title:'Scarborough Fair', composer:'Traditional', emoji:'🌿', bpm:110, bpb:3, pickup:0, key:2, mode:'min', style:'pad', fx:'haunted',
+  notes:'D4/2 D4 A4/2 A4 E4/1.5 F4/0.5 E4 D4/3 A4 C5/2 D5 C5/2 A4 B4 G4 A4/3 D5/2 D5 D5/2 C5 A4 A4 G4 F4 E4/2 C4/3 D4/2 A4 G4/2 F4 E4 D4 C#4 D4/3'},
+];
+S.forEach(s=>{ s.parsed = parse(s.notes); s.noteCount = s.parsed.filter(n=>!n.rest).length; });
+SIO.songs = S;
+SIO.noteToMidi = noteToMidi;
+})();

@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>SingItOut</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="SingItOut">
+<meta name="theme-color" content="#14001f">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="app">
+
+  <!-- ============ CREATE SCREEN ============ -->
+  <section id="screenCreate" class="screen active">
+    <header class="hero">
+      <div class="logo">Sing<span>It</span>Out<b>🎤</b></div>
+      <div class="tag">Type anything. A robot will sing it. Nobody can stop this.</div>
+    </header>
+
+    <div class="card">
+      <div class="card-h"><span class="step">1</span> Write your masterpiece</div>
+      <textarea id="txt" maxlength="500" placeholder="My printer is broken again and the toaster is screaming at me…"></textarea>
+      <div class="row between">
+        <div class="mini-btns">
+          <button class="chip sm" id="btnInspire">🎲 Inspire me</button>
+          <button class="chip sm" id="btnClear">🧽 Clear</button>
+        </div>
+        <span id="count" class="muted">0/500</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-h"><span class="step">2</span> Pick a song <span class="muted" id="songCount"></span></div>
+      <div class="row gap">
+        <input id="songSearch" type="search" placeholder="Search songs…" autocomplete="off">
+        <button class="chip sm" id="btnRandSong">🎲</button>
+        <button class="chip sm" id="btnPreview">👂 Preview</button>
+      </div>
+      <div id="catChips" class="chips scroll cats"></div>
+      <div id="songGrid" class="song-grid"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-h"><span class="step">3</span> Choose a singer</div>
+      <div id="voiceChips" class="chips"></div>
+      <button class="chip sm hear" id="btnHear">👂 Hear this singer</button>
+      <div class="hint" id="voiceHint"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-h"><span class="step">4</span> Make it weird</div>
+      <div class="lbl">Visual effect</div>
+      <div id="fxChips" class="chips scroll"></div>
+      <div class="lbl">Lyric style</div>
+      <div id="lyChips" class="chips scroll"></div>
+      <div class="lbl">Backing band</div>
+      <div id="styleChips" class="chips scroll"></div>
+      <div class="lbl">Grand finale</div>
+      <div id="endChips" class="chips scroll"></div>
+      <div class="sliders">
+        <label>Chaos <b id="chaosLbl"></b><input type="range" id="chaos" min="0" max="3" step="1"></label>
+        <label>Tempo <b id="tempoLbl"></b><input type="range" id="tempo" min="60" max="160" step="5"></label>
+        <label>Pitch <b id="pitchLbl"></b><input type="range" id="pitch" min="-7" max="7" step="1"></label>
+      </div>
+      <label class="toggle"><input type="checkbox" id="bells"> <span>🔔 Melody helper bells (makes the tune easier to recognize)</span></label>
+    </div>
+    <div class="spacer"></div>
+  </section>
+
+  <!-- ============ MY HITS SCREEN ============ -->
+  <section id="screenHits" class="screen">
+    <header class="hero small"><div class="logo">My <span>Hits</span> <b>⭐</b></div><div class="tag">Your certified bangers, saved on this phone.</div></header>
+    <div id="hitsList"></div>
+    <div class="card">
+      <div class="card-h">Backup</div>
+      <div class="row gap wrap">
+        <button class="chip" id="btnExport">📦 Export hits</button>
+        <label class="chip" for="importFile">📥 Import hits</label>
+        <input type="file" id="importFile" accept=".json,application/json" hidden>
+      </div>
+      <div class="hint">Hits live in Safari's storage for this app. Export a backup file to iCloud Drive/Files so clearing Safari data can't delete your legacy.</div>
+    </div>
+    <div class="spacer"></div>
+  </section>
+
+  <!-- ============ BOTTOM BAR ============ -->
+  <div id="bottomBar">
+    <button id="tabCreate" class="tab active">✏️<span>Create</span></button>
+    <button id="btnSing" class="sing-btn">SING IT OUT!</button>
+    <button id="tabHits" class="tab">⭐<span>My Hits</span></button>
+  </div>
+
+  <!-- ============ LOADING ============ -->
+  <div id="loading" class="overlay hidden">
+    <div class="eq"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+    <div id="loadMsg" class="load-msg">Warming up the robot's vocal cords…</div>
+  </div>
+
+  <!-- ============ PERFORMANCE ============ -->
+  <div id="perf" class="overlay hidden">
+    <div id="stage" class="stage">
+      <canvas></canvas>
+      <div class="lyr"></div>
+    </div>
+    <div class="perf-top">
+      <button id="btnClose" class="round">✕</button>
+      <div id="perfTitle" class="perf-title"></div>
+      <button id="btnRemix" class="round" title="Remix visuals">🎲</button>
+    </div>
+    <div class="progress"><div id="prog"></div></div>
+    <div id="finale" class="finale"></div>
+    <div id="perfControls" class="perf-controls hidden">
+      <button class="pc" id="btnReplay">🔁<span>Replay</span></button>
+      <button class="pc" id="btnRemix2">🎲<span>Remix</span></button>
+      <button class="pc" id="btnSave">⭐<span>Save</span></button>
+      <button class="pc hot" id="btnVideo">🎬<span>Video</span></button>
+      <button class="pc" id="btnShare">🎵<span>Audio</span></button>
+      <button class="pc" id="btnEdit">✏️<span>Edit</span></button>
+    </div>
+  </div>
+
+  <!-- ============ VIDEO EXPORT ============ -->
+  <div id="vid" class="overlay hidden">
+    <div class="vid-top"><div class="vid-title" id="vidTitle">🎬 Recording your music video…</div></div>
+    <div id="vidMount" class="vid-mount"></div>
+    <video id="vidPreview" class="vid-preview hidden" playsinline controls loop></video>
+    <div class="vid-bottom">
+      <div class="vbar"><div id="vidProg"></div></div>
+      <div id="vidStatus" class="vid-status">Keep the app open — it records in real time.</div>
+      <div id="vidRecBtns" class="row gap"><button class="chip" id="btnVidCancel">✕ Cancel</button></div>
+      <div id="vidDoneBtns" class="vid-done hidden">
+        <button class="big-btn" id="btnVidSave">📲 Save Video to Phone</button>
+        <div class="row gap"><button class="chip" id="btnVidDownload">⬇️ Download</button><button class="chip" id="btnVidClose">✕ Close</button></div>
+        <div class="hint center">In the share sheet tap <b>Save Video</b> to put it in your Photos.</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+</div>
+
+<script src="js/songs.js"></script>
+<script src="js/lyrics.js"></script>
+<script src="js/dsp.js"></script>
+<script src="js/engine.js"></script>
+<script src="js/visuals.js"></script>
+<script src="js/video.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
